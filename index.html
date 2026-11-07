@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faculty Appointment Scheduling System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f7fc;
+}
+
+header{
+    background:#003366;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+h2{
+    margin:20px 0 10px;
+    color:#003366;
+}
+
+input,select,textarea,button{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    background:#003366;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0055aa;
+}
+
+.faculty-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+.faculty-card{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.slot-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:10px;
+    margin-top:15px;
+}
+
+.slot{
+    background:#28a745;
+    color:white;
+    text-align:center;
+    padding:12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.selected{
+    background:orange;
+    color:black;
+}
+
+.booked{
+    background:red;
+    pointer-events:none;
+}
+
+.confirmation{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    margin-top:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.cancel-btn{
+    background:red;
+}
+
+footer{
+    text-align:center;
+    background:#003366;
+    color:white;
+    padding:15px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Faculty Appointment Scheduling System</h1>
+    <p>Book Faculty Consultation Appointments</p>
+</header>
+
+<div class="container">
+
+<h2>Faculty Directory</h2>
+
+<select id="departmentFilter">
+    <option value="all">All Departments</option>
+    <option value="CSE">CSE</option>
+    <option value="ECE">ECE</option>
+    <option value="CORE">CORE</option>
+</select>
+
+<div class="faculty-grid">
+
+<div class="faculty-card" data-dept="CSE">
+    <h3>Sheetal Chauhan</h3>
+    <p><b>Department:</b> CSE</p>
+    <p><b>Subject:</b> Internet Programming</p>
+    <p><b>Subject code:</b>CSE326</p>
+    <p><b>Cabin:</b> 27-204-C6</p>
+</div>
+
+<div class="faculty-card" data-dept="ECE">
+    <h3>Dr. Nidhi Sharma</h3>
+    <p><b>Department:</b> ECE</p>
+    <p><b>Subject:</b> Basic Electronics Engineering Workshop</p>
+    <p><b>Subject code:</b>ECE120</p>
+    <p><b>Cabin:</b> 28-206-C7</p>
+</div>
+
+<div class="faculty-card" data-dept="CORE">
+    <h3>Dr. Amit Bindra</h3>
+    <p><b>Department:</b> CORE</p>
+    <p><b>Subject:</b> Modern Physics</p>
+    <p><b>Subject code:</b>PHY175</p>
+    <p><b>Cabin:</b> 36-308-C7</p>
+</div>
+
+<div class="faculty-card" data-dept="CORE">
+    <h3>Dr. Sandip Singh</h3>
+    <p><b>Department:</b> CORE</p>
+    <p><b>Subject:</b> Environmental Studies</p>
+    <p><b>Subject code:</b>CHE110</p>
+    <p><b>Cabin:</b> 33-209-C5</p>
+</div>
+
+</div>
+
+<h2>Office Hours Availability</h2>
+
+<select id="facultySelect">
+    <option>Sheetal Chauhan</option>
+    <option>Dr. Nidhi Sharma</option>
+    <option>Dr. Amit Bindra</option>
+    <option>Dr. Sandip Singh</option>
+</select>
+
+<div class="slot-grid">
+
+<div class="slot">09:00-09:15</div>
+<div class="slot">09:15-09:30</div>
+<div class="slot">09:30-09:45</div>
+<div class="slot">09:45-10:00</div>
+<div class="slot">10:00-10:15</div>
+<div class="slot">10:15-10:30</div>
+<div class="slot">10:30-10:45</div>
+<div class="slot">10:45-11:00</div>
+<div class="slot">11:00-11:15</div>
+<div class="slot">11:15-11:30</div>
+
+</div>
+
+<h2>Appointment Booking</h2>
+
+<form id="bookingForm">
+
+<input type="text" id="studentName"
+placeholder="Student Name" required>
+
+<input type="text" id="rollNo"
+placeholder="Roll Number" required>
+
+<input type="text" id="subjectCode"
+placeholder="Subject Code" required>
+
+<textarea id="topic"
+placeholder="Discussion Topic"
+rows="4" required></textarea>
+
+<input type="text" id="selectedSlot"
+placeholder="Selected Time Slot" readonly>
+
+<button type="submit">
+Book Appointment
+</button>
+
+</form>
+
+<div id="confirmationArea"></div>
+
+</div>
+
+<footer>
+<p>&copy; 2026 Student Portal</p>
+</footer>
+
+<script>
+
+let selectedSlot = "";
+
+document.querySelectorAll(".slot").forEach(function(slot){
+
+    slot.addEventListener("click",function(){
+
+        document.querySelectorAll(".slot").forEach(function(s){
+            s.classList.remove("selected");
+        });
+
+        if(!this.classList.contains("booked")){
+            this.classList.add("selected");
+            selectedSlot = this.innerText;
+
+            document.getElementById(
+            "selectedSlot").value = selectedSlot;
+        }
+
+    });
+
+});
+
+document.getElementById("departmentFilter")
+.addEventListener("change",function(){
+
+    let dept = this.value;
+
+    document.querySelectorAll(".faculty-card")
+    .forEach(function(card){
+
+        if(dept==="all" ||
+           card.getAttribute("data-dept")===dept){
+
+            card.style.display="block";
+
+        }else{
+
+            card.style.display="none";
+
+        }
+
+    });
+
+});
+
+document.getElementById("bookingForm")
+.addEventListener("submit",function(e){
+
+    e.preventDefault();
+
+    if(selectedSlot===""){
+        alert("Please select a slot");
+        return;
+    }
+
+    let student =
+    document.getElementById("studentName").value;
+
+    let roll =
+    document.getElementById("rollNo").value;
+
+    let subject =
+    document.getElementById("subjectCode").value;
+
+    let topic =
+    document.getElementById("topic").value;
+
+    let faculty =
+    document.getElementById("facultySelect").value;
+
+    document.querySelectorAll(".slot")
+    .forEach(function(slot){
+
+        if(slot.innerText===selectedSlot){
+            slot.classList.add("booked");
+            slot.classList.remove("selected");
+        }
+
+    });
+
+    document.getElementById("confirmationArea")
+    .innerHTML=
+    `<div class="confirmation">
+
+    <h2>Appointment Confirmed ✅</h2>
+
+    <p><b>Faculty:</b> ${faculty}</p>
+
+    <p><b>Student:</b> ${student}</p>
+
+    <p><b>Roll No:</b> ${roll}</p>
+
+    <p><b>Subject:</b> ${subject}</p>
+
+    <p><b>Topic:</b> ${topic}</p>
+
+    <p><b>Time Slot:</b> ${selectedSlot}</p>
+
+    <button class="cancel-btn"
+    onclick="cancelAppointment('${selectedSlot}')">
+    Cancel Appointment
+    </button>
+
+    </div>`;
+
+    this.reset();
+    selectedSlot="";
+
+});
+
+function cancelAppointment(slot){
+
+    document.querySelectorAll(".slot")
+    .forEach(function(s){
+
+        if(s.innerText===slot){
+
+            s.classList.remove("booked");
+
+        }
+
+    });
+
+    document.getElementById(
+    "confirmationArea").innerHTML="";
+
+    alert("Appointment Cancelled");
+
+}
+
+</script>
+
+</body>
+</html>
